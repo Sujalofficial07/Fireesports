@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fire eSports</string>
+    <string name="notification_channel_tournaments">Tournament Updates</string>
+    <string name="notification_channel_wallet">Wallet Transactions</string>
+    <string name="notification_channel_general">General Notifications</string>
+</resources>
