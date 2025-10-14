@@ -1,0 +1,8 @@
+-keep class com.fireesports.data.model.** { *; }
+-keep class io.github.jan.supabase.** { *; }
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes Exception
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
