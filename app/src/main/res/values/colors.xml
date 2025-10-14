@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="neon_aqua">#00FFFF</color>
+    <color name="neon_pink">#FF006E</color>
+    <color name="neon_purple">#BB00FF</color>
+    <color name="dark_background">#0A0A0F</color>
+    <color name="dark_surface">#15151F</color>
+    <color name="dark_card">#1E1E2E</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+</resources>
