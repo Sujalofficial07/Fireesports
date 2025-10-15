@@ -4,25 +4,20 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ChatMessage(
-    val id: String = "",
-    val chatRoomId: String = "",
-    val senderId: String = "",
-    val senderName: String = "",
-    val message: String = "",
-    val timestamp: Long = System.currentTimeMillis(),
-    val isRead: Boolean = false
+    val id: String,
+    val roomId: String,
+    val senderId: String,
+    val senderName: String,
+    val text: String,
+    val timestamp: Long
 )
+
+enum class ChatType { GLOBAL, TEAM }
 
 @Serializable
 data class ChatRoom(
-    val id: String = "",
-    val type: ChatType = ChatType.GLOBAL,
-    val name: String = "",
-    val participants: List<String> = emptyList(),
-    val lastMessage: String? = null,
-    val lastMessageTime: Long = 0L
+    val id: String,
+    val name: String,
+    val type: ChatType,
+    val members: List<String>
 )
-
-enum class ChatType {
-    GLOBAL, TEAM, PRIVATE
-}
