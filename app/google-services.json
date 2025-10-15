@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "990045256775",
+    "project_id": "fireesports-ce209",
+    "storage_bucket": "fireesports-ce209.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:990045256775:android:89df82e7ada7ba68f68562",
+        "android_client_info": {
+          "package_name": "com.fireesports"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "990045256775-0r9jjfn6ekr198q51mjs1hbaiocrb3g5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeGU6DrdSb3ZFPoEKPZfBjTcmYfmfPuNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "990045256775-0r9jjfn6ekr198q51mjs1hbaiocrb3g5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
