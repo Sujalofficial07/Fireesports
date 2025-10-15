@@ -2,11 +2,8 @@ package com.fireesports.data.repository
 
 import com.fireesports.data.model.Tournament
 import com.fireesports.data.model.TournamentParticipant
-import com.fireesports.data.model.TournamentStatus
 import com.fireesports.data.remote.SupabaseClientProvider
-import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import io.github.jan.supabase.postgrest.from
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +15,7 @@ class TournamentRepository @Inject constructor(
 
     suspend fun getTournaments(): Result<List<Tournament>> {
         return try {
-            val tournaments = supabase.postgrest["tournaments"]
+            val tournaments = supabase.from("tournaments")
                 .select()
                 .decodeList<Tournament>()
             Result.success(tournaments)
@@ -29,11 +26,11 @@ class TournamentRepository @Inject constructor(
 
     suspend fun getTournamentById(id: String): Result<Tournament> {
         return try {
-            val tournament = supabase.postgrest["tournaments"]
+            val tournaments = supabase.from("tournaments")
                 .select() {
                     filter { eq("id", id) }
-                }.decodeSingle<Tournament>()
-            Result.success(tournament)
+                }.decodeList<Tournament>()
+            Result.success(tournaments.first())
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -46,7 +43,7 @@ class TournamentRepository @Inject constructor(
                 userId = userId,
                 teamId = teamId
             )
-            supabase.postgrest["tournament_participants"].insert(participant)
+            supabase.from("tournament_participants").insert(participant)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -55,13 +52,13 @@ class TournamentRepository @Inject constructor(
 
     suspend fun getMyTournaments(userId: String): Result<List<Tournament>> {
         return try {
-            val participants = supabase.postgrest["tournament_participants"]
+            val participants = supabase.from("tournament_participants")
                 .select() {
                     filter { eq("userId", userId) }
                 }.decodeList<TournamentParticipant>()
             
             val tournamentIds = participants.map { it.tournamentId }
-            val tournaments = supabase.postgrest["tournaments"]
+            val tournaments = supabase.from("tournaments")
                 .select() {
                     filter { isIn("id", tournamentIds) }
                 }.decodeList<Tournament>()
@@ -74,13 +71,11 @@ class TournamentRepository @Inject constructor(
 
     suspend fun searchTournaments(query: String): Result<List<Tournament>> {
         return try {
-            val tournaments = supabase.postgrest["tournaments"]
+            val tournaments = supabase.from("tournaments")
                 .select() {
-                    filter { 
-                        or {
-                            ilike("title", "%$query%")
-                            ilike("game", "%$query%")
-                        }
+                    or {
+                        ilike("title", "%$query%")
+                        ilike("game", "%$query%")
                     }
                 }.decodeList<Tournament>()
             Result.success(tournaments)
