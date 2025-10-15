@@ -3,9 +3,10 @@ package com.fireesports.data.repository
 import com.fireesports.data.model.User
 import com.fireesports.data.model.UserRole
 import com.fireesports.data.remote.SupabaseClientProvider
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.builtin.Email
-import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.gotrue.providers.builtin.Email
+import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -39,11 +40,12 @@ class AuthRepository @Inject constructor(
             }
             
             val userId = supabase.auth.currentUserOrNull()?.id ?: throw Exception("No user found")
-            val user = supabase.postgrest["users"]
-                .select() {
+            val users = supabase.from("users")
+                .select {
                     filter { eq("id", userId) }
-                }.decodeSingle<User>()
+                }.decodeList<User>()
             
+            val user = users.firstOrNull() ?: throw Exception("User profile not found")
             _currentUser.value = user
             Result.success(user)
         } catch (e: Exception) {
@@ -74,7 +76,7 @@ class AuthRepository @Inject constructor(
                 role = UserRole.PLAYER
             )
             
-            supabase.postgrest["users"].insert(user)
+            supabase.from("users").insert(user)
             _currentUser.value = user
             Result.success(user)
         } catch (e: Exception) {
@@ -84,13 +86,13 @@ class AuthRepository @Inject constructor(
 
     suspend fun updateProfile(user: User): Result<User> {
         return try {
-            supabase.postgrest["users"].update({
-                set("username", user.username)
-                set("gamerId", user.gamerId)
-                set("avatarUrl", user.avatarUrl)
-                set("phoneNumber", user.phoneNumber)
-                set("language", user.language)
-                set("updatedAt", System.currentTimeMillis())
+            supabase.from("users").update({
+                User::username setTo user.username
+                User::gamerId setTo user.gamerId
+                User::avatarUrl setTo user.avatarUrl
+                User::phoneNumber setTo user.phoneNumber
+                User::language setTo user.language
+                User::updatedAt setTo System.currentTimeMillis()
             }) {
                 filter { eq("id", user.id) }
             }
