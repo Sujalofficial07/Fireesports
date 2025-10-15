@@ -3,8 +3,9 @@ package com.fireesports.data.repository
 import com.fireesports.data.model.ChatMessage
 import com.fireesports.data.model.ChatRoom
 import com.fireesports.data.remote.SupabaseClientProvider
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.realtime.createChannel
+import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.realtime.PostgresAction
+import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +21,7 @@ class ChatRepository @Inject constructor(
 
     suspend fun sendMessage(message: ChatMessage): Result<Unit> {
         return try {
-            supabase.postgrest["chat_messages"].insert(message)
+            supabase.from("chat_messages").insert(message)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -29,10 +30,10 @@ class ChatRepository @Inject constructor(
 
     suspend fun getMessages(chatRoomId: String, limit: Int = 50): Result<List<ChatMessage>> {
         return try {
-            val messages = supabase.postgrest["chat_messages"]
-                .select() {
+            val messages = supabase.from("chat_messages")
+                .select {
                     filter { eq("chatRoomId", chatRoomId) }
-                    order("timestamp", ascending = false)
+                    order(column = "timestamp", ascending = false)
                     limit(limit.toLong())
                 }.decodeList<ChatMessage>()
             Result.success(messages.reversed())
@@ -42,18 +43,18 @@ class ChatRepository @Inject constructor(
     }
 
     fun subscribeToMessages(chatRoomId: String): Flow<ChatMessage> {
-        val channel = supabase.realtime.createChannel("chat_$chatRoomId")
+        val channel = supabase.realtime.channel("chat_$chatRoomId")
         
-        return channel.postgresChangeFlow<ChatMessage>(schema = "public") {
+        return channel.postgresChangeFlow<PostgresAction.Insert>(schema = "public") {
             table = "chat_messages"
             filter = "chatRoomId=eq.$chatRoomId"
-        }.map { it.record }
+        }.map { it.record as ChatMessage }
     }
 
     suspend fun getChatRooms(userId: String): Result<List<ChatRoom>> {
         return try {
-            val rooms = supabase.postgrest["chat_rooms"]
-                .select() {
+            val rooms = supabase.from("chat_rooms")
+                .select {
                     filter { contains("participants", listOf(userId)) }
                 }.decodeList<ChatRoom>()
             Result.success(rooms)
