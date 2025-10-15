@@ -5,7 +5,7 @@ import com.fireesports.data.model.TransactionCategory
 import com.fireesports.data.model.TransactionStatus
 import com.fireesports.data.model.TransactionType
 import com.fireesports.data.remote.SupabaseClientProvider
-import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.from
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,11 +17,12 @@ class WalletRepository @Inject constructor(
 
     suspend fun getBalance(userId: String): Result<Double> {
         return try {
-            val result = supabase.postgrest["users"]
-                .select(columns = listOf("walletBalance")) {
+            val result = supabase.from("users")
+                .select(columns = Columns.list("walletBalance")) {
                     filter { eq("id", userId) }
-                }.decodeSingle<Map<String, Double>>()
-            Result.success(result["walletBalance"] ?: 0.0)
+                }.decodeList<Map<String, Double>>()
+            val balance = result.firstOrNull()?.get("walletBalance") ?: 0.0
+            Result.success(balance)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -38,11 +39,12 @@ class WalletRepository @Inject constructor(
                 status = TransactionStatus.COMPLETED
             )
             
-            supabase.postgrest["wallet_transactions"].insert(transaction)
+            supabase.from("wallet_transactions").insert(transaction)
             
-            // Update user balance
-            supabase.postgrest["users"].update({
-                set("walletBalance", supabase.postgrest.rpc("increment_balance", mapOf("user_id" to userId, "amount" to amount)))
+            // Update user balance manually
+            val currentBalance = getBalance(userId).getOrNull() ?: 0.0
+            supabase.from("users").update({
+                set("walletBalance", currentBalance + amount)
             }) {
                 filter { eq("id", userId) }
             }
@@ -65,11 +67,12 @@ class WalletRepository @Inject constructor(
                 status = TransactionStatus.COMPLETED
             )
             
-            supabase.postgrest["wallet_transactions"].insert(transaction)
+            supabase.from("wallet_transactions").insert(transaction)
             
-            // Update user balance
-            supabase.postgrest["users"].update({
-                set("walletBalance", supabase.postgrest.rpc("decrement_balance", mapOf("user_id" to userId, "amount" to amount)))
+            // Update user balance manually
+            val currentBalance = getBalance(userId).getOrNull() ?: 0.0
+            supabase.from("users").update({
+                set("walletBalance", currentBalance - amount)
             }) {
                 filter { eq("id", userId) }
             }
@@ -82,10 +85,10 @@ class WalletRepository @Inject constructor(
 
     suspend fun getTransactionHistory(userId: String): Result<List<Transaction>> {
         return try {
-            val transactions = supabase.postgrest["wallet_transactions"]
+            val transactions = supabase.from("wallet_transactions")
                 .select() {
                     filter { eq("userId", userId) }
-                    order("timestamp", ascending = false)
+                    order(column = "timestamp", ascending = false)
                 }.decodeList<Transaction>()
             Result.success(transactions)
         } catch (e: Exception) {
