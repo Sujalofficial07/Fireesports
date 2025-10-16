@@ -25,13 +25,14 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            storeFile = file("release.keystore")
-            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "Sujaljat-100"
-            keyAlias = System.getenv("KEY_ALIAS") ?: "fireesportskey"
-            keyPassword = System.getenv("KEY_PASSWORD") ?: "Sujaljat-100"
+        release {
+            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+                storeFile file(MYAPP_RELEASE_STORE_FILE)
+                storePassword MYAPP_RELEASE_STORE_PASSWORD
+                keyAlias MYAPP_RELEASE_KEY_ALIAS
+                keyPassword MYAPP_RELEASE_KEY_PASSWORD
+            }
         }
-    }
 
     buildTypes {
         release {
