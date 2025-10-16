@@ -41,16 +41,18 @@ jobs:
       
     - name: Build release APK
       env:
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        MYAPP_RELEASE_STORE_FILE: app/release.keystore
+        MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        MYAPP_RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: ./gradlew assembleRelease
       
     - name: Build release AAB
       env:
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        MYAPP_RELEASE_STORE_FILE: app/release.keystore
+        MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        MYAPP_RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: ./gradlew bundleRelease
       
     - name: Upload APK
