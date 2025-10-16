@@ -9,13 +9,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.fireesports.ui.screens.auth.LoginScreen
 import com.fireesports.ui.screens.auth.ProfileSetupScreen
 import com.fireesports.ui.screens.auth.RegisterScreen
+import com.fireesports.ui.screens.community.ChatScreen
 import com.fireesports.ui.screens.community.CommunityScreen
 import com.fireesports.ui.screens.home.HomeScreen
 import com.fireesports.ui.screens.profile.ProfileScreen
@@ -52,12 +55,22 @@ fun Navigation() {
             // Main screens
             composable(Screen.Home.route) { HomeScreen(navController) }
             composable(Screen.Tournaments.route) { TournamentsScreen(navController) }
-            composable(Screen.TournamentDetail.route) { backStackEntry ->
+            composable(
+                route = Screen.TournamentDetail.route,
+                arguments = listOf(navArgument("tournamentId") { type = NavType.StringType })
+            ) { backStackEntry ->
                 val tournamentId = backStackEntry.arguments?.getString("tournamentId") ?: ""
                 TournamentDetailScreen(navController, tournamentId)
             }
             composable(Screen.Wallet.route) { WalletScreen(navController) }
             composable(Screen.Community.route) { CommunityScreen(navController) }
+            composable(
+                route = Screen.Chat.route,
+                arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
+                ChatScreen(navController, chatId)
+            }
             composable(Screen.Profile.route) { ProfileScreen(navController) }
         }
     }
@@ -96,7 +109,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                 selected = currentRoute == item.route,
                 onClick = {
                     navController.navigate(item.route) {
-                        popUpTo(Screen.Home.route) { saveState = true }
+                        popUpTo(Screen.Home.route)
                         launchSingleTop = true
                         restoreState = true
                     }
