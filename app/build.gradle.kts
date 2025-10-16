@@ -27,9 +27,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("release.keystore")
-            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "Sujaljat-100"
-            keyAlias = System.getenv("KEY_ALIAS") ?: "fireesportskey"
-            keyPassword = System.getenv("KEY_PASSWORD") ?: "Sujaljat-100"
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "fireesports2025"
+            keyAlias = System.getenv("KEY_ALIAS") ?: "fireesports"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "fireesports2025"
         }
     }
 
