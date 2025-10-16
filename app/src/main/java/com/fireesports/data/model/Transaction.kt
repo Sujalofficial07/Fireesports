@@ -15,14 +15,17 @@ data class Transaction(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+@Serializable
 enum class TransactionType {
     CREDIT, DEBIT
 }
 
+@Serializable
 enum class TransactionCategory {
     TOURNAMENT_ENTRY, PRIZE_WON, REFUND, BONUS, WITHDRAWAL, OTHER
 }
 
+@Serializable
 enum class TransactionStatus {
     PENDING, COMPLETED, FAILED, CANCELLED
 }
