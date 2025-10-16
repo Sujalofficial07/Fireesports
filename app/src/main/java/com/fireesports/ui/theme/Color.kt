@@ -2,25 +2,30 @@ package com.fireesports.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary colors
-val NeonAqua = Color(0xFF00FFFF)  // From colors.xml
-val NeonPink = Color(0xFFFF006E)   // From colors.xml
-val NeonPurple = Color(0xFFBB00FF) // From colors.xml
+// Neon Colors
+val NeonAqua = Color(0xFF00FFFF)
+val NeonPink = Color(0xFFFF006E)
+val NeonPurple = Color(0xFFBB00FF)
+val NeonBlue = Color(0xFF0066FF)
+val NeonGreen = Color(0xFF00FF88)
 
-// Background colors
-val DarkBackground = Color(0xFF0A0A0F) // From colors.xml
-val DarkSurface = Color(0xFF15151F)    // From colors.xml
-val DarkCard = Color(0xFF1E1E2E)       // From colors.xml
+// Dark Theme
+val DarkBackground = Color(0xFF0A0A0F)
+val DarkSurface = Color(0xFF15151F)
+val DarkCard = Color(0xFF1E1E2E)
+val DarkBorder = Color(0xFF2A2A3E)
 
-// Text colors
-val TextPrimary = Color(0xFFFFFFFF)     // From colors.xml
-val TextSecondary = Color(0xFFB3FFFFFF)  // From colors.xml
-val TextTertiary = Color(0xFF808080)     // Adding missing color
+// Glassmorphism
+val GlassWhite = Color(0x1AFFFFFF)
+val GlassWhite2 = Color(0x33FFFFFF)
 
-// Status colors
-val Success = Color(0xFF00E676)
-val Warning = Color(0xFFFFB74D)
-val Error = Color(0xFFFF5252)
+// Text
+val TextPrimary = Color(0xFFFFFFFF)
+val TextSecondary = Color(0xB3FFFFFF)
+val TextTertiary = Color(0x80FFFFFF)
 
-// Additional theme colors
-val DarkBorder = Color(0xFF2A2A3C)
+// Semantic
+val Success = Color(0xFF00FF88)
+val Error = Color(0xFFFF3366)
+val Warning = Color(0xFFFFAA00)
+val Info = Color(0xFF00DDFF)
