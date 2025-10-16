@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import com.fireesports.MainActivity
 import com.fireesports.R
 
 object NotificationHelper {
@@ -16,15 +15,18 @@ object NotificationHelper {
         message: String,
         tournamentId: String
     ) {
-        val intent = Intent(context, MainActivity::class.java).apply {
+        // Create intent to open app (not MainActivity directly since it may not exist)
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("tournamentId", tournamentId)
         }
 
-        val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent = intent?.let {
+            PendingIntent.getActivity(
+                context, 0, it,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        }
 
         val notification = NotificationCompat.Builder(context, "tournaments")
             .setSmallIcon(R.drawable.ic_notification)
@@ -32,7 +34,11 @@ object NotificationHelper {
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
+            .apply {
+                if (pendingIntent != null) {
+                    setContentIntent(pendingIntent)
+                }
+            }
             .build()
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
