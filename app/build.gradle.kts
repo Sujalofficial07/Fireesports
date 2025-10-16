@@ -133,6 +133,8 @@ dependencies {
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
+    implementation("org.slf4j:slf4j-android:1.7.36")
+
     // Accompanist
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.34.0")
 
