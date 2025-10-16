@@ -27,10 +27,12 @@ class TournamentRepository @Inject constructor(
     suspend fun getTournamentById(id: String): Result<Tournament> {
         return try {
             val tournaments = supabase.from("tournaments")
-                .select() {
+                .select {
                     filter { eq("id", id) }
-                }.decodeList<Tournament>()
-            Result.success(tournaments.first())
+                }
+                .decodeList<Tournament>()
+            
+            Result.success(tournaments.firstOrNull() ?: throw Exception("Tournament not found"))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -53,9 +55,10 @@ class TournamentRepository @Inject constructor(
     suspend fun getMyTournaments(userId: String): Result<List<Tournament>> {
         return try {
             val participants = supabase.from("tournament_participants")
-                .select() {
+                .select {
                     filter { eq("userId", userId) }
-                }.decodeList<TournamentParticipant>()
+                }
+                .decodeList<TournamentParticipant>()
             
             val tournamentIds = participants.map { it.tournamentId }
             if (tournamentIds.isEmpty()) {
@@ -63,9 +66,10 @@ class TournamentRepository @Inject constructor(
             }
             
             val tournaments = supabase.from("tournaments")
-                .select() {
+                .select {
                     filter { isIn("id", tournamentIds) }
-                }.decodeList<Tournament>()
+                }
+                .decodeList<Tournament>()
             
             Result.success(tournaments)
         } catch (e: Exception) {
@@ -75,16 +79,17 @@ class TournamentRepository @Inject constructor(
 
     suspend fun searchTournaments(query: String): Result<List<Tournament>> {
         return try {
-            val tournaments = supabase.from("tournaments")
-                .select() {
-                    filter {
-                        or {
-                            ilike("title", "%$query%")
-                            ilike("game", "%$query%")
-                        }
-                    }
-                }.decodeList<Tournament>()
-            Result.success(tournaments)
+            val allTournaments = supabase.from("tournaments")
+                .select()
+                .decodeList<Tournament>()
+            
+            // Filter locally since Supabase 2.6.0 might not support complex filters
+            val filtered = allTournaments.filter { tournament ->
+                tournament.title.contains(query, ignoreCase = true) ||
+                tournament.game.contains(query, ignoreCase = true)
+            }
+            
+            Result.success(filtered)
         } catch (e: Exception) {
             Result.failure(e)
         }
