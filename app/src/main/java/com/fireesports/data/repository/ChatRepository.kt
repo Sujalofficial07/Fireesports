@@ -4,6 +4,7 @@ import com.fireesports.data.model.ChatMessage
 import com.fireesports.data.model.ChatRoom
 import com.fireesports.data.remote.SupabaseClientProvider
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
@@ -33,7 +34,7 @@ class ChatRepository @Inject constructor(
             val messages = supabase.from("chat_messages")
                 .select {
                     filter { eq("chatRoomId", chatRoomId) }
-                    order(column = "timestamp", ascending = false)
+                    order(column = "timestamp", order = Order.DESCENDING)
                     limit(limit.toLong())
                 }.decodeList<ChatMessage>()
             Result.success(messages.reversed())
