@@ -22,8 +22,10 @@ class WalletRepository @Inject constructor(
             val result = supabase.from("users")
                 .select(columns = Columns.list("walletBalance")) {
                     filter { eq("id", userId) }
-                }.decodeList<Map<String, Double>>()
-            val balance = result.firstOrNull()?.get("walletBalance") ?: 0.0
+                }
+                .decodeList<Map<String, Any>>()
+            
+            val balance = result.firstOrNull()?.get("walletBalance")?.toString()?.toDoubleOrNull() ?: 0.0
             Result.success(balance)
         } catch (e: Exception) {
             Result.failure(e)
@@ -43,11 +45,11 @@ class WalletRepository @Inject constructor(
             
             supabase.from("wallet_transactions").insert(transaction)
             
-            // Update user balance manually
+            // Update user balance
             val currentBalance = getBalance(userId).getOrNull() ?: 0.0
-            supabase.from("users").update({
-                set("walletBalance", currentBalance + amount)
-            }) {
+            val updates = mapOf("walletBalance" to (currentBalance + amount))
+            
+            supabase.from("users").update(updates) {
                 filter { eq("id", userId) }
             }
             
@@ -57,8 +59,20 @@ class WalletRepository @Inject constructor(
         }
     }
 
-    suspend fun deductFunds(userId: String, amount: Double, category: TransactionCategory, description: String, referenceId: String? = null): Result<Transaction> {
+    suspend fun deductFunds(
+        userId: String, 
+        amount: Double, 
+        category: TransactionCategory, 
+        description: String, 
+        referenceId: String? = null
+    ): Result<Transaction> {
         return try {
+            // Check balance first
+            val currentBalance = getBalance(userId).getOrNull() ?: 0.0
+            if (currentBalance < amount) {
+                return Result.failure(Exception("Insufficient balance"))
+            }
+            
             val transaction = Transaction(
                 userId = userId,
                 amount = amount,
@@ -71,11 +85,10 @@ class WalletRepository @Inject constructor(
             
             supabase.from("wallet_transactions").insert(transaction)
             
-            // Update user balance manually
-            val currentBalance = getBalance(userId).getOrNull() ?: 0.0
-            supabase.from("users").update({
-                set("walletBalance", currentBalance - amount)
-            }) {
+            // Update user balance
+            val updates = mapOf("walletBalance" to (currentBalance - amount))
+            
+            supabase.from("users").update(updates) {
                 filter { eq("id", userId) }
             }
             
@@ -88,10 +101,11 @@ class WalletRepository @Inject constructor(
     suspend fun getTransactionHistory(userId: String): Result<List<Transaction>> {
         return try {
             val transactions = supabase.from("wallet_transactions")
-                .select() {
+                .select {
                     filter { eq("userId", userId) }
                     order(column = "timestamp", order = Order.DESCENDING)
-                }.decodeList<Transaction>()
+                }
+                .decodeList<Transaction>()
             Result.success(transactions)
         } catch (e: Exception) {
             Result.failure(e)
