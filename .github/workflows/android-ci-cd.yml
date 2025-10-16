@@ -10,64 +10,65 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
-        
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-      
+
+    # ✅ Decode the keystore from GitHub Secret
     - name: Decode keystore
       run: |
         mkdir -p app
         echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release.keystore
-      
+
     - name: Lint check
       run: ./gradlew lintDebug
-      
+
     - name: Run tests
       run: ./gradlew testDebugUnitTest
-      
-    - name: Build debug APK
+
+    - name: Build Debug APK
       run: ./gradlew assembleDebug
-      
-    - name: Build release APK
+
+    # ✅ Build signed Release APK
+    - name: Build Release APK
       env:
-        MYAPP_RELEASE_STORE_FILE: app/release.keystore
-        MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        MYAPP_RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      run: ./gradlew assembleRelease
-      
-    - name: Build release AAB
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: ./gradlew clean assembleRelease --stacktrace
+
+    # ✅ Build signed Release AAB
+    - name: Build Release AAB
       env:
-        MYAPP_RELEASE_STORE_FILE: app/release.keystore
-        MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        MYAPP_RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      run: ./gradlew bundleRelease
-      
-    - name: Upload APK
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: ./gradlew bundleRelease --stacktrace
+
+    - name: Upload Release APK
       uses: actions/upload-artifact@v4
       with:
-        name: fire-esports-release
+        name: fire-esports-release-apk
         path: app/build/outputs/apk/release/app-release.apk
-        
-    - name: Upload AAB
+
+    - name: Upload Release AAB
       uses: actions/upload-artifact@v4
       with:
-        name: fire-esports-bundle
+        name: fire-esports-release-aab
         path: app/build/outputs/bundle/release/app-release.aab
-        
-    - name: Create Release
+
+    - name: Create GitHub Release
       if: github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
@@ -76,7 +77,6 @@ jobs:
           app/build/outputs/bundle/release/app-release.aab
         tag_name: v1.0.${{ github.run_number }}
         name: Release v1.0.${{ github.run_number }}
-        draft: false
-        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
