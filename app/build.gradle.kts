@@ -71,6 +71,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/versions/9/previous-compilation-data.bin"
         }
+
+        jniLibs {
+            keepDebugSymbols += ["**/libandroidx.graphics.path.so", "**/libdatastore_shared_counter.so"]
+        }
     }
 
     lint {
