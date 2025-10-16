@@ -6,6 +6,8 @@ import com.fireesports.data.model.TransactionStatus
 import com.fireesports.data.model.TransactionType
 import com.fireesports.data.remote.SupabaseClientProvider
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Order
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -88,7 +90,7 @@ class WalletRepository @Inject constructor(
             val transactions = supabase.from("wallet_transactions")
                 .select() {
                     filter { eq("userId", userId) }
-                    order(column = "timestamp", ascending = false)
+                    order(column = "timestamp", order = Order.DESCENDING)
                 }.decodeList<Transaction>()
             Result.success(transactions)
         } catch (e: Exception) {
