@@ -94,6 +94,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
     // Navigation
+    implementation("org.slf4j:slf4j-android:1.7.36")
     implementation("androidx.navigation:navigation-compose:2.8.2")
 
     // Lifecycle
