@@ -25,17 +25,16 @@ android {
     }
 
     signingConfigs {
-        release {
-            storeFile file("fireesports-release.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "Sujaljat-100"
-            keyAlias System.getenv("KEY_ALIAS") ?: "fireesportskey"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "Sujaljat-100"
+        create("release") {
+            storeFile = file("release.keystore")
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "Sujaljat-100"
+            keyAlias = System.getenv("KEY_ALIAS") ?: "fireesportskey"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "Sujaljat-100"
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -133,8 +132,6 @@ dependencies {
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-
-    implementation("org.slf4j:slf4j-android:1.7.36")
 
     // Accompanist
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.34.0")
