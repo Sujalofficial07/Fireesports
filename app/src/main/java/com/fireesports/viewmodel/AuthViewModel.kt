@@ -20,6 +20,13 @@ class AuthViewModel @Inject constructor(
 
     val currentUser: StateFlow<User?> = authRepository.currentUser
 
+    init {
+        // Auto-check session on app start
+        if (currentUser.value != null) {
+            _uiState.value = AuthUiState.SignInSuccess
+        }
+    }
+
     fun signUp(email: String, password: String) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
@@ -36,6 +43,16 @@ class AuthViewModel @Inject constructor(
             authRepository.signIn(email, password).fold(
                 onSuccess = { _uiState.value = AuthUiState.SignInSuccess },
                 onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "Sign in failed") }
+            )
+        }
+    }
+
+    fun signInWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _uiState.value = AuthUiState.Loading
+            authRepository.signInWithGoogle(idToken).fold(
+                onSuccess = { _uiState.value = AuthUiState.SignInSuccess },
+                onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "Google sign-in failed") }
             )
         }
     }
