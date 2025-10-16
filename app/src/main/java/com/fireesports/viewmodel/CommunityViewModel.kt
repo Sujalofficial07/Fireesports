@@ -12,12 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed class CommunityUiState {
-    object Loading : CommunityUiState()
-    object Success : CommunityUiState()
-    data class Error(val message: String) : CommunityUiState()
-}
-
 @HiltViewModel
 class CommunityViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
@@ -60,7 +54,6 @@ class CommunityViewModel @Inject constructor(
                 onFailure = { _uiState.value = CommunityUiState.Error(it.message ?: "Failed to load messages") }
             )
             
-            // Subscribe to real-time updates
             chatRepository.subscribeToMessages(chatRoomId).collect { newMessage ->
                 _messages.value = _messages.value + newMessage
             }
@@ -81,4 +74,10 @@ class CommunityViewModel @Inject constructor(
             chatRepository.sendMessage(chatMessage)
         }
     }
+}
+
+sealed class CommunityUiState {
+    object Loading : CommunityUiState()
+    object Success : CommunityUiState()
+    data class Error(val message: String) : CommunityUiState()
 }
