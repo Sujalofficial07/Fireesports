@@ -58,6 +58,10 @@ class TournamentRepository @Inject constructor(
                 }.decodeList<TournamentParticipant>()
             
             val tournamentIds = participants.map { it.tournamentId }
+            if (tournamentIds.isEmpty()) {
+                return Result.success(emptyList())
+            }
+            
             val tournaments = supabase.from("tournaments")
                 .select() {
                     filter { isIn("id", tournamentIds) }
@@ -73,9 +77,11 @@ class TournamentRepository @Inject constructor(
         return try {
             val tournaments = supabase.from("tournaments")
                 .select() {
-                    or {
-                        ilike("title", "%$query%")
-                        ilike("game", "%$query%")
+                    filter {
+                        or {
+                            ilike("title", "%$query%")
+                            ilike("game", "%$query%")
+                        }
                     }
                 }.decodeList<Tournament>()
             Result.success(tournaments)
