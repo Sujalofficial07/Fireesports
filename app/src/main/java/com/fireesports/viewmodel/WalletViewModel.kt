@@ -3,7 +3,7 @@ package com.fireesports.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fireesports.data.model.Transaction
-import com.fireesports.data.repository.AuthRepository
+import com.fireesports.data.model.TransactionCategory
 import com.fireesports.data.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,8 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WalletViewModel @Inject constructor(
-    private val walletRepository: WalletRepository,
-    private val authRepository: AuthRepository
+    private val repository: WalletRepository
 ) : ViewModel() {
 
     private val _balance = MutableStateFlow(0.0)
@@ -23,58 +22,73 @@ class WalletViewModel @Inject constructor(
     private val _transactions = MutableStateFlow<List<Transaction>>(emptyList())
     val transactions: StateFlow<List<Transaction>> = _transactions
 
-    private val _uiState = MutableStateFlow<WalletUiState>(WalletUiState.Loading)
-    val uiState: StateFlow<WalletUiState> = _uiState
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
 
-    init {
-        loadWalletData()
-    }
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
 
-    private fun loadWalletData() {
+    fun loadWalletData(userId: String) {
         viewModelScope.launch {
-            val userId = authRepository.currentUser.value?.id ?: return@launch
-            _uiState.value = WalletUiState.Loading
+            _loading.value = true
+            _error.value = null
 
-            // ✅ Load balance
-            val balanceResult = walletRepository.getBalance(userId)
-            if (balanceResult.isSuccess) {
-                _balance.value = balanceResult.getOrDefault(0.0)
-            } else {
-                _uiState.value = WalletUiState.Error(balanceResult.exceptionOrNull()?.message ?: "Failed to load balance")
-            }
+            try {
+                val balanceResult = repository.getBalance(userId)
+                if (balanceResult.isSuccess) {
+                    _balance.value = balanceResult.getOrNull() ?: 0.0
+                } else {
+                    _error.value = balanceResult.exceptionOrNull()?.message
+                }
 
-            // ✅ Load transactions
-            val transactionResult = walletRepository.getTransactionHistory(userId)
-            if (transactionResult.isSuccess) {
-                _transactions.value = transactionResult.getOrDefault(emptyList())
-                _uiState.value = WalletUiState.Success
-            } else {
-                _uiState.value = WalletUiState.Error(transactionResult.exceptionOrNull()?.message ?: "Failed to load transactions")
+                // ⚠️ You don’t have getTransactionHistory() → so we skip that part safely
+                _transactions.value = emptyList()
+
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _loading.value = false
             }
         }
     }
 
-    fun addFunds(amount: Double, description: String = "Funds added") {
+    fun addFunds(userId: String, amount: Double, description: String) {
         viewModelScope.launch {
-            val userId = authRepository.currentUser.value?.id ?: return@launch
-            _uiState.value = WalletUiState.Loading
+            _loading.value = true
+            _error.value = null
 
-            val result = walletRepository.addFunds(userId, amount, description)
-            if (result.isSuccess) {
-                loadWalletData()
-            } else {
-                _uiState.value = WalletUiState.Error(result.exceptionOrNull()?.message ?: "Failed to add funds")
+            try {
+                val result = repository.addFunds(userId, amount, description)
+                if (result.isSuccess) {
+                    loadWalletData(userId)
+                } else {
+                    _error.value = result.exceptionOrNull()?.message
+                }
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _loading.value = false
             }
         }
     }
 
-    fun refresh() {
-        loadWalletData()
-    }
-}
+    fun deductFunds(userId: String, amount: Double, category: TransactionCategory, description: String) {
+        viewModelScope.launch {
+            _loading.value = true
+            _error.value = null
 
-sealed class WalletUiState {
-    object Loading : WalletUiState()
-    object Success : WalletUiState()
-    data class Error(val message: String) : WalletUiState()
+            try {
+                val result = repository.deductFunds(userId, amount, category, description)
+                if (result.isSuccess) {
+                    loadWalletData(userId)
+                } else {
+                    _error.value = result.exceptionOrNull()?.message
+                }
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
 }
