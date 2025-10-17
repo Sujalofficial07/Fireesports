@@ -44,10 +44,12 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    // Get Google Sign-In intent
     fun getGoogleSignInIntent(): Intent {
-        return authRepository.getGoogleSignInClient().signInIntent
+        return authRepository.createGoogleSignInIntent()
     }
 
+    // Handle Google Sign-In result
     fun handleGoogleSignInResult(result: ActivityResult) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
@@ -60,6 +62,8 @@ class AuthViewModel @Inject constructor(
                     onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "Google sign in failed") }
                 )
             } catch (e: ApiException) {
+                _uiState.value = AuthUiState.Error("Google sign in failed: ${e.message}")
+            } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error("Google sign in failed: ${e.message}")
             }
         }
