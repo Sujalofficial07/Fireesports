@@ -10,6 +10,8 @@ class FirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
         
+        Log.d(TAG, "From: ${remoteMessage.from}")
+        
         remoteMessage.notification?.let {
             val title = it.title ?: "Fire eSports"
             val body = it.body ?: ""
@@ -27,13 +29,23 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                 "wallet" -> {
                     NotificationHelper.showWalletNotification(this, title, body)
                 }
+                else -> {
+                    NotificationHelper.showWalletNotification(this, title, body)
+                }
             }
         }
     }
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Log.d("FCM", "New token: $token")
-        // Send token to backend
+        Log.d(TAG, "Refreshed token: $token")
+        
+        // TODO: Send token to your backend server
+        // This is where you'd send the FCM token to Supabase
+        // to enable push notifications for this device
+    }
+
+    companion object {
+        private const val TAG = "FireESports_FCM"
     }
 }
