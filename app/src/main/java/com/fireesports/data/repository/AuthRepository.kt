@@ -28,16 +28,17 @@ class AuthRepository @Inject constructor(
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser
 
-    // Google Sign-In client
+    // Google Sign-In client (private)
     private val googleSignInClient: GoogleSignInClient by lazy {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(WEB_CLIENT_ID) // Replace with your Web Client ID
+            .requestIdToken(WEB_CLIENT_ID)
             .requestEmail()
             .build()
         GoogleSignIn.getClient(context, gso)
     }
 
-    fun getGoogleSignInClient(): GoogleSignInClient = googleSignInClient
+    // Public method to get Google Sign-In intent
+    fun createGoogleSignInIntent() = googleSignInClient.signInIntent
 
     // Email/Password Sign Up
     suspend fun signUp(email: String, password: String): Result<Unit> {
@@ -105,7 +106,7 @@ class AuthRepository @Inject constructor(
                     id = userId,
                     email = email,
                     username = displayName.ifEmpty { email.substringBefore("@") },
-                    gamerId = "G${userId.take(8)}", // Auto-generate gamer ID
+                    gamerId = "G${userId.take(8)}",
                     avatarUrl = photoUrl,
                     role = UserRole.PLAYER
                 )
@@ -181,6 +182,7 @@ class AuthRepository @Inject constructor(
 
     companion object {
         // TODO: Replace with your actual Web Client ID from Firebase Console
-        private const val WEB_CLIENT_ID = "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com"
+        // Get it from: Firebase Console → Project Settings → Your Android App
+        private const val WEB_CLIENT_ID = "990045256775-0r9jjfn6ekr198q51mjs1hbaiocrb3g5.apps.googleusercontent.com"
     }
 }
