@@ -1,9 +1,13 @@
 package com.fireesports.viewmodel
 
+import android.content.Intent
+import androidx.activity.result.ActivityResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fireesports.data.model.User
 import com.fireesports.data.repository.AuthRepository
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +41,27 @@ class AuthViewModel @Inject constructor(
                 onSuccess = { _uiState.value = AuthUiState.SignInSuccess },
                 onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "Sign in failed") }
             )
+        }
+    }
+
+    fun getGoogleSignInIntent(): Intent {
+        return authRepository.getGoogleSignInClient().signInIntent
+    }
+
+    fun handleGoogleSignInResult(result: ActivityResult) {
+        viewModelScope.launch {
+            _uiState.value = AuthUiState.Loading
+            try {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                val account = task.getResult(ApiException::class.java)
+                
+                authRepository.signInWithGoogle(account).fold(
+                    onSuccess = { _uiState.value = AuthUiState.SignInSuccess },
+                    onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "Google sign in failed") }
+                )
+            } catch (e: ApiException) {
+                _uiState.value = AuthUiState.Error("Google sign in failed: ${e.message}")
+            }
         }
     }
 
