@@ -17,10 +17,6 @@ class WalletViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    // -------------------------------
-    // UI States
-    // -------------------------------
-
     private val _balance = MutableStateFlow(0.0)
     val balance: StateFlow<Double> = _balance
 
@@ -30,64 +26,45 @@ class WalletViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<WalletUiState>(WalletUiState.Loading)
     val uiState: StateFlow<WalletUiState> = _uiState
 
-    // -------------------------------
-    // Initialization
-    // -------------------------------
-
     init {
         loadWalletData()
     }
 
-    // -------------------------------
-    // Core Wallet Logic
-    // -------------------------------
-
     private fun loadWalletData() {
         viewModelScope.launch {
-            val userId = authRepository.currentUser.value?.id ?: run {
-                _uiState.value = WalletUiState.Error("User not logged in")
-                return@launch
-            }
-
+            val userId = authRepository.currentUser.value?.id ?: return@launch
             _uiState.value = WalletUiState.Loading
 
-            // Load balance
-            walletRepository.getBalance(userId)
-                .onSuccess { balance ->
-                    _balance.value = balance
-                }
-                .onFailure { e ->
-                    _uiState.value = WalletUiState.Error(e.message ?: "Failed to load balance")
-                }
+            // ✅ Load balance
+            val balanceResult = walletRepository.getBalance(userId)
+            if (balanceResult.isSuccess) {
+                _balance.value = balanceResult.getOrDefault(0.0)
+            } else {
+                _uiState.value = WalletUiState.Error(balanceResult.exceptionOrNull()?.message ?: "Failed to load balance")
+            }
 
-            // Load transactions
-            walletRepository.getTransactionHistory(userId)
-                .onSuccess { history ->
-                    _transactions.value = history
-                    _uiState.value = WalletUiState.Success
-                }
-                .onFailure { e ->
-                    _uiState.value = WalletUiState.Error(e.message ?: "Failed to load transactions")
-                }
+            // ✅ Load transactions
+            val transactionResult = walletRepository.getTransactionHistory(userId)
+            if (transactionResult.isSuccess) {
+                _transactions.value = transactionResult.getOrDefault(emptyList())
+                _uiState.value = WalletUiState.Success
+            } else {
+                _uiState.value = WalletUiState.Error(transactionResult.exceptionOrNull()?.message ?: "Failed to load transactions")
+            }
         }
     }
 
     fun addFunds(amount: Double, description: String = "Funds added") {
         viewModelScope.launch {
-            val userId = authRepository.currentUser.value?.id ?: run {
-                _uiState.value = WalletUiState.Error("User not logged in")
-                return@launch
-            }
-
+            val userId = authRepository.currentUser.value?.id ?: return@launch
             _uiState.value = WalletUiState.Loading
 
-            walletRepository.addFunds(userId, amount, description)
-                .onSuccess {
-                    loadWalletData()
-                }
-                .onFailure { e ->
-                    _uiState.value = WalletUiState.Error(e.message ?: "Failed to add funds")
-                }
+            val result = walletRepository.addFunds(userId, amount, description)
+            if (result.isSuccess) {
+                loadWalletData()
+            } else {
+                _uiState.value = WalletUiState.Error(result.exceptionOrNull()?.message ?: "Failed to add funds")
+            }
         }
     }
 
@@ -95,10 +72,6 @@ class WalletViewModel @Inject constructor(
         loadWalletData()
     }
 }
-
-// -------------------------------
-// UI State Class
-// -------------------------------
 
 sealed class WalletUiState {
     object Loading : WalletUiState()
