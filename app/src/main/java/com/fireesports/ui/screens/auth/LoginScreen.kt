@@ -153,9 +153,10 @@ fun LoginScreen(
                 ) {
                     // You can add Google logo here if you have the drawable
                     // Image(painter = painterResource(R.drawable.ic_google), ...)
-                    Text(
-                        text = "🔵", // Placeholder - replace with Google logo
-                        fontSize = 20.sp
+                    Image(
+                        painter = painterResource(R.drawable.ic_google),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
