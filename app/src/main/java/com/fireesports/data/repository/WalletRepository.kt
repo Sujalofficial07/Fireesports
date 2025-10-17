@@ -18,97 +18,81 @@ class WalletRepository @Inject constructor(
     private val supabase = supabaseProvider.client
 
     suspend fun getBalance(userId: String): Result<Double> {
-        return try {
-            val result = supabase.from("users")
-                .select(columns = Columns.list("walletBalance")) {
-                    filter { eq("id", userId) }
-                }
-                .decodeList<Map<String, Any>>()
-            
-            val balance = result.firstOrNull()?.get("walletBalance")?.toString()?.toDoubleOrNull() ?: 0.0
-            Result.success(balance)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    return try {
+        val result = supabase.from("users")
+            .select(columns = Columns.list("wallet_balance")) {  // Changed from walletBalance
+                filter { eq("id", userId) }
+            }
+            .decodeList<Map<String, Any>>()
+        
+        val balance = result.firstOrNull()?.get("wallet_balance")?.toString()?.toDoubleOrNull() ?: 0.0
+        Result.success(balance)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
+}
 
     suspend fun addFunds(userId: String, amount: Double, description: String): Result<Transaction> {
-        return try {
-            val transaction = Transaction(
-                userId = userId,
-                amount = amount,
-                type = TransactionType.CREDIT,
-                category = TransactionCategory.BONUS,
-                description = description,
-                status = TransactionStatus.COMPLETED
-            )
-            
-            supabase.from("wallet_transactions").insert(transaction)
-            
-            // Update user balance
-            val currentBalance = getBalance(userId).getOrNull() ?: 0.0
-            val updates = mapOf("walletBalance" to (currentBalance + amount))
-            
-            supabase.from("users").update(updates) {
-                filter { eq("id", userId) }
-            }
-            
-            Result.success(transaction)
-        } catch (e: Exception) {
-            Result.failure(e)
+      return try {
+        val transaction = Transaction(
+            userId = userId,
+            amount = amount,
+            type = TransactionType.CREDIT,
+            category = TransactionCategory.BONUS,
+            description = description,
+            status = TransactionStatus.COMPLETED
+        )
+        
+        supabase.from("wallet_transactions").insert(transaction)
+        
+        // Update user balance
+        val currentBalance = getBalance(userId).getOrNull() ?: 0.0
+        val updates = mapOf("wallet_balance" to (currentBalance + amount))  // Changed
+        
+        supabase.from("users").update(updates) {
+            filter { eq("id", userId) }
         }
+        
+        Result.success(transaction)
+      } catch (e: Exception) {
+          Result.failure(e)
     }
+}
 
     suspend fun deductFunds(
-        userId: String, 
-        amount: Double, 
-        category: TransactionCategory, 
-        description: String, 
-        referenceId: String? = null
+       userId: String, 
+       amount: Double, 
+       category: TransactionCategory, 
+       description: String, 
+       referenceId: String? = null
     ): Result<Transaction> {
-        return try {
-            // Check balance first
-            val currentBalance = getBalance(userId).getOrNull() ?: 0.0
-            if (currentBalance < amount) {
-                return Result.failure(Exception("Insufficient balance"))
-            }
-            
-            val transaction = Transaction(
-                userId = userId,
-                amount = amount,
-                type = TransactionType.DEBIT,
-                category = category,
-                description = description,
-                referenceId = referenceId,
-                status = TransactionStatus.COMPLETED
-            )
-            
-            supabase.from("wallet_transactions").insert(transaction)
-            
-            // Update user balance
-            val updates = mapOf("walletBalance" to (currentBalance - amount))
-            
-            supabase.from("users").update(updates) {
-                filter { eq("id", userId) }
-            }
-            
-            Result.success(transaction)
-        } catch (e: Exception) {
-            Result.failure(e)
+      return try {
+        val currentBalance = getBalance(userId).getOrNull() ?: 0.0
+        if (currentBalance < amount) {
+            return Result.failure(Exception("Insufficient balance"))
         }
-    }
-
-    suspend fun getTransactionHistory(userId: String): Result<List<Transaction>> {
-        return try {
-            val transactions = supabase.from("wallet_transactions")
-                .select {
-                    filter { eq("userId", userId) }
-                    order(column = "timestamp", order = Order.DESCENDING)
-                }
-                .decodeList<Transaction>()
-            Result.success(transactions)
-        } catch (e: Exception) {
-            Result.failure(e)
+        
+        val transaction = Transaction(
+            userId = userId,
+            amount = amount,
+            type = TransactionType.DEBIT,
+            category = category,
+            description = description,
+            referenceId = referenceId,
+            status = TransactionStatus.COMPLETED
+        )
+        
+        supabase.from("wallet_transactions").insert(transaction)
+        
+        // Update user balance
+        val updates = mapOf("wallet_balance" to (currentBalance - amount))  // Changed
+        
+        supabase.from("users").update(updates) {
+            filter { eq("id", userId) }
         }
+        
+        Result.success(transaction)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 }
