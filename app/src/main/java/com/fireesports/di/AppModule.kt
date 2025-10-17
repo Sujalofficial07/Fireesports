@@ -1,10 +1,12 @@
 package com.fireesports.di
 
+import android.content.Context
 import com.fireesports.data.remote.SupabaseClientProvider
 import com.fireesports.data.repository.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -21,9 +23,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAuthRepository(
-        supabaseProvider: SupabaseClientProvider
+        supabaseProvider: SupabaseClientProvider,
+        @ApplicationContext context: Context
     ): AuthRepository {
-        return AuthRepository(supabaseProvider)
+        return AuthRepository(supabaseProvider, context)
     }
 
     @Provides
