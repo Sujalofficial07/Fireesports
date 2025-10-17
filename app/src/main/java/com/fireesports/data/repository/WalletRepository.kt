@@ -96,3 +96,4 @@ class WalletRepository @Inject constructor(
         Result.failure(e)
     }
 }
+}
