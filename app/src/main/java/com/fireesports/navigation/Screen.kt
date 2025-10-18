@@ -16,4 +16,12 @@ sealed class Screen(val route: String) {
     }
     object Profile : Screen("profile")
     object Settings : Screen("settings")
+    
+    // ADMIN ROUTES
+    object AdminPanel : Screen("admin")
+    object CreateTournament : Screen("admin/create_tournament")
+    object ManageTournaments : Screen("admin/manage_tournaments")
+    object ManageUsers : Screen("admin/manage_users")
+    object Analytics : Screen("admin/analytics")
+    object AdminWallet : Screen("admin/wallet_management")
 }
