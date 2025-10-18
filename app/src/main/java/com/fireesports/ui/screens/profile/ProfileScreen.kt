@@ -205,6 +205,16 @@ fun EditProfileDialog(
                 )
             }
         },
+if (currentUser?.role == UserRole.ADMIN) {
+    Spacer(modifier = Modifier.height(16.dp))
+    
+    GlowButton(
+        text = "ADMIN PANEL",
+        onClick = { navController.navigate(Screen.AdminPanel.route) },
+        modifier = Modifier.fillMaxWidth(),
+        glowColor = NeonPurple
+     )
+   },        
         confirmButton = {
             Button(
                 onClick = {
