@@ -51,6 +51,12 @@ fun Navigation() {
             composable(Screen.Login.route) { LoginScreen(navController) }
             composable(Screen.Register.route) { RegisterScreen(navController) }
             composable(Screen.ProfileSetup.route) { ProfileSetupScreen(navController) }
+            composable(Screen.AdminPanel.route) { AdminPanelScreen(navController) }
+            composable(Screen.CreateTournament.route) { CreateTournamentScreen(navController) }
+            composable(Screen.ManageTournaments.route) { ManageTournamentsScreen(navController) }
+            composable(Screen.ManageUsers.route) { ManageUsersScreen(navController) }
+            composable(Screen.Analytics.route) { AnalyticsScreen(navController) }
+
 
             // Main screens
             composable(Screen.Home.route) { HomeScreen(navController) }
