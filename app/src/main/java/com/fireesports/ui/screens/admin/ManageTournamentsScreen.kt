@@ -223,3 +223,36 @@ fun TournamentManageCard(
                         showDeleteDialog = false
                     },
                     colors = ButtonDefaults.buttonColors(
+                        containerColor = Error
+                    )
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun InfoChip(label: String, value: String) {
+    Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+        Text(
+            text = label,
+            fontFamily = Montserrat,
+            fontSize = 10.sp,
+            color = TextSecondary
+        )
+        Text(
+            text = value,
+            fontFamily = Montserrat,
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            color = TextPrimary
+        )
+    }
+}
