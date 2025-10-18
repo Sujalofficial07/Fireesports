@@ -52,4 +52,11 @@ object AppModule {
     ): ChatRepository {
         return ChatRepository(supabaseProvider)
     }
+    @Provides
+    @Singleton
+    fun provideAdminRepository(
+        supabaseProvider: SupabaseClientProvider
+    ): AdminRepository {
+        return AdminRepository(supabaseProvider)
+    }
 }
