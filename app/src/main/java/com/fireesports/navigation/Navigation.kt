@@ -15,6 +15,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.fireesports.ui.screens.admin.AdminPanelScreen
+import com.fireesports.ui.screens.admin.AnalyticsScreen
+import com.fireesports.ui.screens.admin.CreateTournamentScreen
+import com.fireesports.ui.screens.admin.ManageTournamentsScreen
+import com.fireesports.ui.screens.admin.ManageUsersScreen
 import com.fireesports.ui.screens.auth.LoginScreen
 import com.fireesports.ui.screens.auth.ProfileSetupScreen
 import com.fireesports.ui.screens.auth.RegisterScreen
@@ -51,12 +56,6 @@ fun Navigation() {
             composable(Screen.Login.route) { LoginScreen(navController) }
             composable(Screen.Register.route) { RegisterScreen(navController) }
             composable(Screen.ProfileSetup.route) { ProfileSetupScreen(navController) }
-            composable(Screen.AdminPanel.route) { AdminPanelScreen(navController) }
-            composable(Screen.CreateTournament.route) { CreateTournamentScreen(navController) }
-            composable(Screen.ManageTournaments.route) { ManageTournamentsScreen(navController) }
-            composable(Screen.ManageUsers.route) { ManageUsersScreen(navController) }
-            composable(Screen.Analytics.route) { AnalyticsScreen(navController) }
-
 
             // Main screens
             composable(Screen.Home.route) { HomeScreen(navController) }
@@ -78,6 +77,13 @@ fun Navigation() {
                 ChatScreen(navController, chatId)
             }
             composable(Screen.Profile.route) { ProfileScreen(navController) }
+            
+            // Admin screens
+            composable(Screen.AdminPanel.route) { AdminPanelScreen(navController) }
+            composable(Screen.CreateTournament.route) { CreateTournamentScreen(navController) }
+            composable(Screen.ManageTournaments.route) { ManageTournamentsScreen(navController) }
+            composable(Screen.ManageUsers.route) { ManageUsersScreen(navController) }
+            composable(Screen.Analytics.route) { AnalyticsScreen(navController) }
         }
     }
 }
