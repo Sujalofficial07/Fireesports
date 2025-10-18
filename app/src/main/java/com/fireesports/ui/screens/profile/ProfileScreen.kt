@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.fireesports.data.model.UserRole
 import com.fireesports.navigation.Screen
 import com.fireesports.ui.components.GlowButton
 import com.fireesports.ui.components.NeonCard
@@ -114,6 +115,18 @@ fun ProfileScreen(
                 glowColor = NeonPurple
             )
 
+            // Admin Panel Button - only show for admins
+            if (user.role == UserRole.ADMIN) {
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                GlowButton(
+                    text = "ADMIN PANEL",
+                    onClick = { navController.navigate(Screen.AdminPanel.route) },
+                    modifier = Modifier.fillMaxWidth(),
+                    glowColor = NeonPurple
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedButton(
@@ -205,16 +218,6 @@ fun EditProfileDialog(
                 )
             }
         },
-if (currentUser?.role == UserRole.ADMIN) {
-    Spacer(modifier = Modifier.height(16.dp))
-    
-    GlowButton(
-        text = "ADMIN PANEL",
-        onClick = { navController.navigate(Screen.AdminPanel.route) },
-        modifier = Modifier.fillMaxWidth(),
-        glowColor = NeonPurple
-     )
-   },        
         confirmButton = {
             Button(
                 onClick = {
